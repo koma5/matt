@@ -15,20 +15,31 @@
 	<script src="knockout.js"></script>
 	
 	<script>
-	var mattViewModel = function()
+	var device = function(topic)
 	{
-		this.sendOn = function()
-		{
-			$.post("./mqtt.php",{ t: "byteli/light/1", p: "on" });
-		}
-		this.sendOff = function()
-		{
-			$.post("./mqtt.php",{ t: "byteli/light/1", p: "off" });
-		}
+		deviceTopic = topic;
+		postURL = "./mqtt.php";
+		
 		this.sendToggle = function()
 		{
-			$.post("./mqtt.php",{ t: "byteli/light/1"});
+			$.post(postURL, { t: deviceTopic});
 		}
+		
+		this.sendOn = function()
+		{
+			$.post(postURL, { t: deviceTopic, p: "on" });
+		}
+		
+		this.sendOff = function()
+		{
+			$.post(postURL, { t: deviceTopic, p: "off" });
+		}
+	}
+	
+	
+	var mattViewModel = function()
+	{
+		LED = new device("byteli/light/1");
 	}
 	
 	$(document).ready(function()
@@ -47,9 +58,9 @@
 
 
 	<div>
-		<button data-bind='click: sendToggle'>toggle</button>
-		<button data-bind='click: sendOn'>on</button>
-		<button data-bind='click: sendOff'>off</button>
+		<button data-bind='click: LED.sendToggle'>toggle</button>
+		<button data-bind='click: LED.sendOn'>on</button>
+		<button data-bind='click: LED.sendOff'>off</button>
 	</div>
 
 
