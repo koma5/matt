@@ -39,8 +39,8 @@
 	
 	var mattViewModel = function()
 	{
-		LED = new device("byteli/light/1");
-	}
+		led = new device("byteli/light/1")
+	};
 	
 	$(document).ready(function()
 	{
@@ -53,17 +53,13 @@
 </head>
 <body>
 
-
-
-
-
 	<div>
-		<button data-bind='click: LED.sendToggle'>toggle</button>
-		<button data-bind='click: LED.sendOn'>on</button>
-		<button data-bind='click: LED.sendOff'>off</button>
+		<ul>
+		<li><button data-bind='click: led.sendOn'>on</button></li>
+		<li><button data-bind='click: led.sendOff'>off</button></li>
+		<li><button data-bind='click: led.sendToggle'>toggle</button></li>
+		</ul>
 	</div>
-
-
 
 </body>
 </html>

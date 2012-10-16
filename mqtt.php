@@ -2,8 +2,6 @@
 
 require("phpMQTT/phpMQTT.php");
 
-
-
 if (isset($_REQUEST['t']))
 {
 	$topic = $_REQUEST['t'];
@@ -19,17 +17,7 @@ if (isset($_REQUEST['t']))
 		$mqtt->close();
 	}
 
-
-
 }
-
-
-
-
-
-
-
-
 
 ?>
 
