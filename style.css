@@ -30,3 +30,12 @@
 	position:relative;
 	top:1px;
 }
+
+p {
+    font-family: Helvetica;
+    font-size: 12px;
+    margin-top: 10px;
+    margin-right: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+}
