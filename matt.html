@@ -17,29 +17,31 @@
 	<script>
 	var device = function(topic)
 	{
-		deviceTopic = topic;
-		postURL = "./mqtt.php";
+		var self = this;
+		self.deviceTopic = topic;
+		self.postURL = "./mqtt.php";
 		
-		this.sendToggle = function()
+		self.sendToggle = function()
 		{
-			$.post(postURL, { t: deviceTopic});
+			$.post(self.postURL, { t: self.deviceTopic});
 		}
 		
-		this.sendOn = function()
+		self.sendOn = function()
 		{
-			$.post(postURL, { t: deviceTopic, p: "on" });
+			$.post(self.postURL, { t: self.deviceTopic, p: "on" });
 		}
 		
-		this.sendOff = function()
+		self.sendOff = function()
 		{
-			$.post(postURL, { t: deviceTopic, p: "off" });
+			$.post(self.postURL, { t: self.deviceTopic, p: "off" });
 		}
 	}
 	
 	
 	var mattViewModel = function()
 	{
-		led = new device("byteli/light/1")
+		led    = new device("byteli/light/1");
+		heater = new device("vw/heater");
 	};
 	
 	$(document).ready(function()
@@ -54,9 +56,15 @@
 <body>
 
 	<div>
+		<p>byteli/light/1</p>
 		<button class="myButton" data-bind='click: led.sendOn'>on</button>
 		<button class="myButton" data-bind='click: led.sendOff'>off</button>
 		<button class="myButton" data-bind='click: led.sendToggle'>toggle</button>
+		<br/>
+		<p>VW Büssli Heizöffeli (vw/heater)</p>
+                <button class="myButton" data-bind='click: heater.sendOn'>on</button>
+                <button class="myButton" data-bind='click: heater.sendOff'>off</button>
+                <button class="myButton" data-bind='click: heater.sendToggle'>toggle</button>
 	</div>
 
 </body>
