@@ -11,29 +11,66 @@
 
 	<link rel="stylesheet" href="./style.css">
 
+	<script src="mqttws31.js"></script>
 	<script src="jquery-1.7.1.min.js"></script>
 	<script src="knockout.js"></script>
 	
 	<script>
+$( document ).ready(function() {
+	client = new Messaging.Client("172.16.0.70", 80, "matt");
+	// set callback handlers
+	client.onConnectionLost = onConnectionLost;
+	client.onMessageArrived = onMessageArrived;
+
+	// connect the client
+	client.connect({onSuccess:onConnect});
+
+
+	// called when the client connects
+	function onConnect() {
+  	// Once a connection has been made, make a subscription and send a message.
+  	console.log("onConnect");
+  	client.subscribe("byteli/light/1/state");
+	client.subscribe("vw/heater/state")
+	}
+
+	// called when the client loses its connection
+	function onConnectionLost(responseObject) {
+  	if (responseObject.errorCode !== 0) {
+    	console.log("onConnectionLost:"+responseObject.errorMessage);
+  	}
+	}
+
+	// called when a message arrives
+	function onMessageArrived(message) {
+	  console.log("onMessageArrived:"+message.payloadString);
+	}
+
+
 	var device = function(topic)
 	{
 		var self = this;
 		self.deviceTopic = topic;
-		self.postURL = "./mqtt.php";
 		
 		self.sendToggle = function()
 		{
-			$.post(self.postURL, { t: self.deviceTopic});
+		        message = new Messaging.Message("toggle");
+        		message.destinationName = self.deviceTopic;
+        		client.send(message); 
 		}
 		
 		self.sendOn = function()
 		{
-			$.post(self.postURL, { t: self.deviceTopic, p: "on" });
+		        message = new Messaging.Message("on");
+                        message.destinationName = self.deviceTopic;
+                        client.send(message);
 		}
 		
 		self.sendOff = function()
 		{
-			$.post(self.postURL, { t: self.deviceTopic, p: "off" });
+		        message = new Messaging.Message("off");
+                        message.destinationName = self.deviceTopic;
+                        client.send(message); 
 		}
 	}
 	
@@ -50,6 +87,7 @@
 	})
 
 	
+});
 	</script>
 	
 </head>
