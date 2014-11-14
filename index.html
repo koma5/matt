@@ -16,42 +16,55 @@
 	<script src="knockout.js"></script>
 	
 	<script>
-$( document ).ready(function() {
-	client = new Messaging.Client("172.16.0.70", 80, "matt");
-	// set callback handlers
-	client.onConnectionLost = onConnectionLost;
-	client.onMessageArrived = onMessageArrived;
-
-	// connect the client
-	client.connect({onSuccess:onConnect});
-
-
-	// called when the client connects
 	function onConnect() {
-  	// Once a connection has been made, make a subscription and send a message.
-  	console.log("onConnect");
-  	client.subscribe("byteli/light/1/state");
-	client.subscribe("vw/heater/state")
+  		console.log("onConnect");
+		light.subscribeState();
+                heater.subscribeState();
 	}
 
 	// called when the client loses its connection
 	function onConnectionLost(responseObject) {
-  	if (responseObject.errorCode !== 0) {
-    	console.log("onConnectionLost:"+responseObject.errorMessage);
-  	}
+  		if (responseObject.errorCode !== 0) {
+    			console.log("onConnectionLost:"+responseObject.errorMessage);
+			client.connect({onSuccess:onConnect});
+  		}
 	}
 
 	// called when a message arrives
 	function onMessageArrived(message) {
-	  console.log("onMessageArrived:"+message.payloadString);
+	  console.log(message.destinationName + ": " + message.payloadString);
+	  if(message.destinationName == light.deviceStateTopic)
+	  {
+		if(message.payloadString == "on") {
+	  		light.state(true);
+		}
+		else {
+			light.state(false);
+		}
+	  }
+	  else if(message.destinationName == heater.deviceStateTopic) {
+                if(message.payloadString == "on") {
+                        heater.state(true);
+                }
+                else {
+                        heater.state(false);
+                }
+	  }
 	}
 
 
-	var device = function(topic)
+	var device = function(topic, stateTopic)
 	{
 		var self = this;
+		self.state = ko.observable();
 		self.deviceTopic = topic;
+		self.deviceStateTopic = stateTopic
 		
+		self.isOn  = function() { return  self.state(); }
+		self.isOff = function() { 
+			if(typeof self.state() === 'undefined') { return false;}
+			else { return !self.state(); }
+		}
 		self.sendToggle = function()
 		{
 		        message = new Messaging.Message("toggle");
@@ -72,22 +85,31 @@ $( document ).ready(function() {
                         message.destinationName = self.deviceTopic;
                         client.send(message); 
 		}
+		self.subscribeState = function()
+		{
+			client.subscribe(self.deviceStateTopic);
+		}
 	}
 	
 	
 	var mattViewModel = function()
 	{
-		led    = new device("byteli/light/1");
-		heater = new device("vw/heater");
+		light  = new device("byteli/light/1", "byteli/light/1/state");
+		heater = new device("vw/heater", "vw/heater/state");
 	};
 	
 	$(document).ready(function()
 	{
 		ko.applyBindings(new mattViewModel());
-	})
 
+		client = new Messaging.Client("172.16.0.70", 80, "matt" + Math.floor((Math.random() * 100) + 1));
+
+        	client.onConnectionLost = onConnectionLost;
+        	client.onMessageArrived = onMessageArrived;
+
+        	client.connect({onSuccess:onConnect});
+	})
 	
-});
 	</script>
 	
 </head>
@@ -95,13 +117,13 @@ $( document ).ready(function() {
 
 	<div>
 		<p>byteli/light/1</p>
-		<button class="myButton" data-bind='click: led.sendOn'>on</button>
-		<button class="myButton" data-bind='click: led.sendOff'>off</button>
-		<button class="myButton" data-bind='click: led.sendToggle'>toggle</button>
+		<button class="myButton" data-bind='css: { myActiveButton : light.isOn() }, click: light.sendOn'>on</button>
+		<button class="myButton" data-bind='css: { myActiveButton : light.isOff() }, click: light.sendOff'>off</button>
+		<button class="myButton" data-bind='click: light.sendToggle'>toggle</button>
 		<br/>
 		<p>VW Büssli Heizöffeli (vw/heater)</p>
-                <button class="myButton" data-bind='click: heater.sendOn'>on</button>
-                <button class="myButton" data-bind='click: heater.sendOff'>off</button>
+                <button class="myButton" data-bind='css: { myActiveButton : heater.isOn() }, click: heater.sendOn'>on</button>
+                <button class="myButton" data-bind='css: { myActiveButton : heater.isOff() }, click: heater.sendOff'>off</button>
                 <button class="myButton" data-bind='click: heater.sendToggle'>toggle</button>
 	</div>
 
