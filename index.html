@@ -117,14 +117,14 @@
 
 	<div>
 		<p>byteli/light/1</p>
-		<button class="myButton" data-bind='css: { myActiveButton : light.isOn() }, click: light.sendOn'>on</button>
-		<button class="myButton" data-bind='css: { myActiveButton : light.isOff() }, click: light.sendOff'>off</button>
-		<button class="myButton" data-bind='click: light.sendToggle'>toggle</button>
+		<button class="button button-rounded button-flat-action" data-bind='css: { active : light.isOn() }, click: light.sendOn'>on</button>
+		<button class="button button-rounded button-flat-action" data-bind='css: { active : light.isOff() }, click: light.sendOff'>off</button>
+		<button class="button button-rounded button-flat-action" data-bind='click: light.sendToggle'>toggle</button>
 		<br/>
 		<p>VW Büssli Heizöffeli (vw/heater)</p>
-                <button class="myButton" data-bind='css: { myActiveButton : heater.isOn() }, click: heater.sendOn'>on</button>
-                <button class="myButton" data-bind='css: { myActiveButton : heater.isOff() }, click: heater.sendOff'>off</button>
-                <button class="myButton" data-bind='click: heater.sendToggle'>toggle</button>
+                <button class="button button-rounded button-flat-action" data-bind='css: { active : heater.isOn() }, click: heater.sendOn'>on</button>
+                <button class="button button-rounded button-flat-action" data-bind='css: { active : heater.isOff() }, click: heater.sendOff'>off</button>
+                <button class="button button-rounded button-flat-action" data-bind='click: heater.sendToggle'>toggle</button>
 	</div>
 
 </body>
