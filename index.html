@@ -32,7 +32,7 @@
 
 	// called when a message arrives
 	function onMessageArrived(message) {
-	  console.log(message.destinationName + ": " + message.payloadString);
+	  console.log(message.destinationName + " " + message.payloadString);
 	  if(message.destinationName == light.deviceStateTopic)
 	  {
 		if(message.payloadString == "on") {
@@ -65,26 +65,19 @@
 			if(typeof self.state() === 'undefined') { return false;}
 			else { return !self.state(); }
 		}
-		self.sendToggle = function()
+
+		self.sendMessage = function(messageString)
 		{
-		        message = new Messaging.Message("toggle");
+		        message = new Messaging.Message(messageString);
         		message.destinationName = self.deviceTopic;
         		client.send(message); 
+			console.log("send: " + self.deviceTopic + " " + message.payloadString);
 		}
-		
-		self.sendOn = function()
-		{
-		        message = new Messaging.Message("on");
-                        message.destinationName = self.deviceTopic;
-                        client.send(message);
-		}
-		
-		self.sendOff = function()
-		{
-		        message = new Messaging.Message("off");
-                        message.destinationName = self.deviceTopic;
-                        client.send(message); 
-		}
+
+		self.sendOn     = function() { self.sendMessage("on");     }	
+		self.sendOff    = function() { self.sendMessage("off");    }
+		self.sendToggle = function() { self.sendMessage("toggle"); }
+
 		self.subscribeState = function()
 		{
 			client.subscribe(self.deviceStateTopic);
@@ -101,8 +94,8 @@
 	$(document).ready(function()
 	{
 		ko.applyBindings(new mattViewModel());
-
-		client = new Messaging.Client("172.16.0.70", 80, "matt" + Math.floor((Math.random() * 100) + 1));
+		var randomNummber = Math.floor((Math.random() * 100) + 1);
+		client = new Messaging.Client("172.16.0.70", 80, "matt-" + randomNummber);
 
         	client.onConnectionLost = onConnectionLost;
         	client.onMessageArrived = onMessageArrived;
