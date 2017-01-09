@@ -22,9 +22,9 @@
 	<ul data-bind="foreach: devices">
 		<li>
 			<p data-bind="text: name"></p>
-			<button class="button button-rounded button-flat-action" data-bind='css: { active : isOn() }, click: sendOn'>on</button>
-			<button class="button button-rounded button-flat-action" data-bind='css: { active : isOff() }, click: sendOff'>off</button>
-			<button class="button button-rounded button-flat-action" data-bind='click: sendToggle'>toggle</button>
+			<button class="btn" data-bind='css: { active : isOn() }, click: sendOn'>on</button>
+			<button class="btn" data-bind='css: { active : isOff() }, click: sendOff'>off</button>
+			<button class="btn" data-bind='click: sendToggle'>toggle</button>
 			<br/>
 		</li>
 
