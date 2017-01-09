@@ -1,4 +1,5 @@
-<!doctype html>
+<!DOCTYPE html>
+<html>
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -9,116 +10,44 @@
 
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 
-	<link rel="stylesheet" href="./style.css">
+	<link rel="stylesheet" href="style.css">
 
-	<script src="mqttws31.js"></script>
-	<script src="jquery-1.7.1.min.js"></script>
-	<script src="knockout.js"></script>
-	
-	<script>
-	function onConnect() {
-  		console.log("onConnect");
-		light.subscribeState();
-                heater.subscribeState();
-	}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.0/mqttws31.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js"></script>
+	<script src="matt.js"></script>
 
-	// called when the client loses its connection
-	function onConnectionLost(responseObject) {
-  		if (responseObject.errorCode !== 0) {
-    			console.log("onConnectionLost:"+responseObject.errorMessage);
-			client.connect({onSuccess:onConnect});
-  		}
-	}
-
-	// called when a message arrives
-	function onMessageArrived(message) {
-	  console.log(message.destinationName + " " + message.payloadString);
-	  if(message.destinationName == light.deviceStateTopic)
-	  {
-		if(message.payloadString == "on") {
-	  		light.state(true);
-		}
-		else {
-			light.state(false);
-		}
-	  }
-	  else if(message.destinationName == heater.deviceStateTopic) {
-                if(message.payloadString == "on") {
-                        heater.state(true);
-                }
-                else {
-                        heater.state(false);
-                }
-	  }
-	}
-
-
-	var device = function(topic, stateTopic)
-	{
-		var self = this;
-		self.state = ko.observable();
-		self.deviceTopic = topic;
-		self.deviceStateTopic = stateTopic
-		
-		self.isOn  = function() { return  self.state(); }
-		self.isOff = function() { 
-			if(typeof self.state() === 'undefined') { return false;}
-			else { return !self.state(); }
-		}
-
-		self.sendMessage = function(messageString)
-		{
-		        message = new Messaging.Message(messageString);
-        		message.destinationName = self.deviceTopic;
-        		client.send(message); 
-			console.log("send: " + self.deviceTopic + " " + message.payloadString);
-		}
-
-		self.sendOn     = function() { self.sendMessage("on");     }	
-		self.sendOff    = function() { self.sendMessage("off");    }
-		self.sendToggle = function() { self.sendMessage("toggle"); }
-
-		self.subscribeState = function()
-		{
-			client.subscribe(self.deviceStateTopic);
-		}
-	}
-	
-	
-	var mattViewModel = function()
-	{
-		light  = new device("byteli/light/1", "byteli/light/1/state");
-		heater = new device("vw/heater", "vw/heater/state");
-	};
-	
-	$(document).ready(function()
-	{
-		ko.applyBindings(new mattViewModel());
-		var randomNummber = Math.floor((Math.random() * 100) + 1);
-		client = new Messaging.Client("172.16.0.70", 80, "matt-" + randomNummber);
-
-        	client.onConnectionLost = onConnectionLost;
-        	client.onMessageArrived = onMessageArrived;
-
-        	client.connect({onSuccess:onConnect});
-	})
-	
-	</script>
-	
 </head>
 <body>
 
-	<div>
-		<p>byteli/light/1</p>
-		<button class="button button-rounded button-flat-action" data-bind='css: { active : light.isOn() }, click: light.sendOn'>on</button>
-		<button class="button button-rounded button-flat-action" data-bind='css: { active : light.isOff() }, click: light.sendOff'>off</button>
-		<button class="button button-rounded button-flat-action" data-bind='click: light.sendToggle'>toggle</button>
-		<br/>
-		<p>VW Büssli Heizöffeli (vw/heater)</p>
-                <button class="button button-rounded button-flat-action" data-bind='css: { active : heater.isOn() }, click: heater.sendOn'>on</button>
-                <button class="button button-rounded button-flat-action" data-bind='css: { active : heater.isOff() }, click: heater.sendOff'>off</button>
-                <button class="button button-rounded button-flat-action" data-bind='click: heater.sendToggle'>toggle</button>
-	</div>
+	<ul data-bind="foreach: devices">
+		<li>
+			<p data-bind="text: name"></p>
+			<button class="button button-rounded button-flat-action" data-bind='css: { active : isOn() }, click: sendOn'>on</button>
+			<button class="button button-rounded button-flat-action" data-bind='css: { active : isOff() }, click: sendOff'>off</button>
+			<button class="button button-rounded button-flat-action" data-bind='click: sendToggle'>toggle</button>
+			<br/>
+		</li>
+
+	</ul>
+
+	<script>
+
+	var devices = [];
+	devices.push(new device("byteli/light/1", "byteli/light/1/state"));
+	devices.push(new device("vw/heater", "vw/heater/state", "VW Büssli Heizöffeli (vw/heater)"));
+	devices.push(new device("vw/something", "vw/something/state", "something else"));
+
+	ko.applyBindings(devices);
+
+	var randomNummber = Math.floor((Math.random() * 100) + 1);
+	client = new Paho.MQTT.Client("172.16.0.70", 80, "matt-" + randomNummber);
+
+	client.onConnectionLost = onConnectionLost;
+	client.onMessageArrived = onMessageArrived;
+
+	client.connect({onSuccess:onConnect});
+
+	</script>
 
 </body>
 </html>
