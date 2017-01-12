@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>matt - graph</title>
+	<meta name="description" content="mqtt Home Automation Dashboard">
+	<meta name="author" content="Marco Koch">
+
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.0/mqttws31.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+  <style>
+  .line {
+    fill: none;
+    stroke: #b44646;
+    stroke-width: 2px;
+  }
+  </style>
+</head>
+<body>
+<svg width="1200" height="500"></svg>
+
+
+<script>
+function onConnect() {
+    console.log("onConnect");
+    client.subscribe("xbee/volt");
+}
+
+// called when the client loses its connection
+function onConnectionLost(responseObject) {
+    if (responseObject.errorCode !== 0) {
+        console.log("onConnectionLost:"+responseObject.errorMessage);
+        client.connect({onSuccess:onConnect});
+    }
+}
+
+// called when a message arrives
+function onMessageArrived(message) {
+  console.log(message.destinationName + " " + message.payloadString);
+  data.push({value: message.payloadString,
+            time: new Date()});
+  update();
+}
+
+function update() {
+
+  x = d3.scaleTime()
+      .domain([d3.min(data, function(d) {return d.time;}), d3.max(data, function(d) {return d.time;}) ])
+      .range([0, width]);
+
+  y = d3.scaleLinear()
+      .domain([d3.min(data, function(d) {return d.value;}), d3.max(data, function(d) {return d.value;}) ])
+      .range([height, 0]);
+
+  svg.selectAll(".line")
+    .transition().duration(500)
+    .attr('d', line(data));
+
+}
+
+data = [];
+
+var svg = d3.select("svg"),
+    margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var g = svg.append('g');
+
+var line = d3.line()
+  .curve(d3.curveBasis)
+  .x(function(d, i) {
+    //console.log(x(d.time));
+    return x(d.time);
+  })
+  .y(function(d, i) {
+    //console.log(y(d.value));
+    return y(d.value);
+  })
+
+  g.append("path")
+    .attr("class", "line")
+    .attr("fill", "black")
+
+var randomNummber = Math.floor((Math.random() * 100) + 1);
+client = new Paho.MQTT.Client("172.16.0.70", 80, "matt-" + randomNummber);
+
+client.onConnectionLost = onConnectionLost;
+client.onMessageArrived = onMessageArrived;
+
+client.connect({onSuccess:onConnect});
+
+</script>
+
+</body>
+</html>
