@@ -60,6 +60,7 @@ function update() {
     .transition().duration(500)
     .attr('d', line(data));
 
+    localStorage.setItem("data", JSON.stringify(data));
 }
 
 data = [];
@@ -86,6 +87,13 @@ var line = d3.line()
   g.append("path")
     .attr("class", "line")
     .attr("fill", "black")
+
+if(localStorage.getItem("data") !== null) {
+  data = JSON.parse(localStorage.getItem("data"));
+  data.forEach(function(d, i) { d.time = d3.isoParse(d.time); });
+  update();
+}
+
 
 var randomNummber = Math.floor((Math.random() * 100) + 1);
 client = new Paho.MQTT.Client("172.16.0.70", 80, "matt-" + randomNummber);
