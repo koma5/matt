@@ -27,7 +27,7 @@
 <script>
 function onConnect() {
     console.log("onConnect");
-    client.subscribe("xbee/volt");
+    client.subscribe(topic);
 }
 
 // called when the client loses its connection
@@ -56,22 +56,33 @@ function update() {
       .domain([d3.min(data, function(d) {return d.value;}), d3.max(data, function(d) {return d.value;}) ])
       .range([height, 0]);
 
+  xAxis = d3.axisBottom(x);
+  yAxis = d3.axisRight(y);
+
+  svg.selectAll(".axis--y")
+    .transition().duration(500)
+    .call(yAxis);
+  svg.selectAll(".axis--x")
+    .transition().duration(500)
+    .call(xAxis);
+
   svg.selectAll(".line")
     .transition().duration(500)
     .attr('d', line(data));
 
-    localStorage.setItem("data", JSON.stringify(data));
+    localStorage.setItem(topic, JSON.stringify(data));
 }
 
 data = [];
 
+var topic = "xbee/volt";
+
 var svg = d3.select("svg"),
-    margin = {top: 20, right: 20, bottom: 30, left: 50},
+    margin = {top: 20, right: 30, bottom: 30, left: 20},
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
     g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var g = svg.append('g');
 
 var line = d3.line()
   .curve(d3.curveBasis)
@@ -88,8 +99,16 @@ var line = d3.line()
     .attr("class", "line")
     .attr("fill", "black")
 
-if(localStorage.getItem("data") !== null) {
-  data = JSON.parse(localStorage.getItem("data"));
+  g.append("g")
+    .attr("class", "axis axis--y")
+    .attr("transform", "translate(" + width + ", 0)");
+
+  g.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0 , " + height + ")");
+
+if(localStorage.getItem(topic) !== null) {
+  data = JSON.parse(localStorage.getItem(topic));
   data.forEach(function(d, i) { d.time = d3.isoParse(d.time); });
   update();
 }
