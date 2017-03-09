@@ -2,6 +2,7 @@ function onConnect() {
     console.log("onConnect");
     for(i = 0; i < devices.length; i++) {
       devices[i].subscribeState();
+      devices[i].sendMessage('state');
     }
 }
 
