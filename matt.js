@@ -22,7 +22,7 @@ function onMessageArrived(message) {
       if(message.payloadString == "on") {
           devices[i].state(true);
       }
-      else {
+      else if (message.payloadString == "off"){
           devices[i].state(false);
       }
     }
